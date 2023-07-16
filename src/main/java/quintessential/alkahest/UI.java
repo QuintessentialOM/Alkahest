@@ -7,6 +7,7 @@ import com.github.weisj.darklaf.theme.OneDarkTheme;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
@@ -22,39 +23,25 @@ public final class UI{
 		
 		frame = new JFrame("Alkahest");
 		
-		var content = new JPanel();
-		content.setLayout(new BorderLayout());
-		frame.setContentPane(content);
-		
-		content.add(leftPanel(), BorderLayout.WEST);
-		content.add(getModsPanel(), BorderLayout.CENTER);
+		JTabbedPane pane = new JTabbedPane(JTabbedPane.LEFT);
+		pane.addTab("dummy", new JPanel());
+		pane.addTab("Get Mods", getModsPanel());
+		pane.addTab("Installed Mods", new JPanel());
+		pane.addTab("Quintessential", new JPanel());
+		pane.addTab("Settings", new JPanel());
+		var runButton = new JButton("Run Quintessential"){
+			public void setEnabled(boolean b){}
+		};
+		runButton.setBackground(Color.GREEN.darker().darker().darker());
+		pane.setTabComponentAt(0, runButton);
+		pane.setEnabledAt(0, false);
+		pane.setSelectedIndex(1);
+		frame.add(pane);
 		
 		frame.setSize(600, 400);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
-	}
-	
-	private static JPanel leftPanel(){
-		var buttonsPanel = new JPanel();
-		buttonsPanel.setSize(new Dimension(101, 100));
-		buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
-		buttonsPanel.setAlignmentY(Component.TOP_ALIGNMENT);
-		
-		buttonsPanel.add(installedModsPage = new JButton("Installed Mods"));
-		buttonsPanel.add(getModsPage = new JButton("Get Mods"));
-		buttonsPanel.add(quintessentialPage = new JButton("Quintessential"));
-		buttonsPanel.add(settingsPage = new JButton("Settings"));
-		
-		var panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		panel.add(Box.createRigidArea(new Dimension(6, 6)));
-		panel.add(buttonsPanel);
-		panel.add(Box.createRigidArea(new Dimension(4, 4)));
-		var sep = new JSeparator(SwingConstants.VERTICAL);
-		panel.add(sep);
-		
-		return panel;
 	}
 	
 	private static JComponent getModsPanel(){
