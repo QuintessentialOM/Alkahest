@@ -9,9 +9,22 @@ import java.util.List;
 
 public final class Installs{
 
-	public static final String vanillaName = "Lightning.exe";
-	public static final String moddedName = "ModdedLightning.exe";
-	
+	public static final String vanillaName;
+	public static final String moddedName;
+
+	static {
+		if(System.getProperty("os.name").contains("Windows")) {
+			vanillaName = "Lightning.exe";
+			moddedName = "ModdedLightning.exe";
+		} else if(System.getProperty("os.arch").contains("64")) {
+			vanillaName = "Lightning.bin.x86_64";
+			moddedName = "ModdedLightning.bin.x86_64";
+		} else {
+			vanillaName = "Lightning.bin.x86";
+			moddedName = "ModdedLightning.bin.x86";
+		}
+	}
+
 	public static final List<String> pathHints = List.of(
 			"C:/Program Files (x86)/Steam/steamapps/common/Opus Magnum",
 			System.getProperty("user.home") + "/.local/share/Steam/steamapps/common/Opus Magnum"
