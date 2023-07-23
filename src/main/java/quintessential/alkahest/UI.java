@@ -15,6 +15,7 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public final class UI{
 
@@ -70,7 +71,7 @@ public final class UI{
 			repoPanel.add(new JLabel(repo.name()));
 		}else{
 			ModVersion latest = versions.get(0);
-			latest.iconUrl().ifPresent(icon -> repoPanel.add(getIconComponent(icon)));
+			latest.iconUrl().flatMap(UI::getIconComponent).ifPresent(repoPanel::add);
 			
 			var infoPanel = new JPanel();
 			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
@@ -90,15 +91,16 @@ public final class UI{
 		return repoPanel;
 	}
 	
-	private static JComponent getIconComponent(String url){
+	private static Optional<JComponent> getIconComponent(String url){
 		try{
 			URL u = new URL(url);
 			Image image = ImageIO.read(u).getScaledInstance(64, 64, Image.SCALE_SMOOTH);
 			var icon = new ImageIcon(image);
 			icon.setDescription("Mod icon");
-			return new JLabel(icon);
+			return Optional.of(new JLabel(icon));
 		}catch(IOException e){
-			throw new RuntimeException(e);
+			System.out.println("Invalid icon " + url);
+			return Optional.empty();
 		}
 	}
 	

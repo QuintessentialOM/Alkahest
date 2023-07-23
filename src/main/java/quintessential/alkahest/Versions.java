@@ -44,7 +44,7 @@ public final class Versions{
 				Optional.ofNullable(parsed.Title),
 				Optional.ofNullable(parsed.Desc),
 				// in theory, someone could use a PSD here, but that's unlikely and probably not worth supporting here
-				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + ".png"),
+				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + (path.endsWith(".png") ? "" : ".png")),
 				Optional.ofNullable(assetUrl)
 		);
 	}
