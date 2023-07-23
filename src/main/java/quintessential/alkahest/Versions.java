@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.yaml.snakeyaml.Yaml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +19,21 @@ public final class Versions{
 		for(JsonElement versionElem : response){
 			JsonObject versionObj = versionElem.getAsJsonObject();
 			String tagName = versionObj.get("tag_name").getAsString();
+			String assetUrl = null;
+			if(versionObj.has("assets")){
+				var assets = versionObj.getAsJsonArray("assets");
+				if(assets.size() == 1)
+					assetUrl = assets.get(0).getAsJsonObject().get("browser_download_url").getAsString();
+			}
 			
-			ModVersion version = fetchVersionInfo(repo, tagName);
+			ModVersion version = fetchVersionInfo(repo, tagName, assetUrl);
 			ret.add(version);
 		}
 		
 		return ret;
 	}
 	
-	private static ModVersion fetchVersionInfo(ModRepo repo, String tag){
+	private static ModVersion fetchVersionInfo(ModRepo repo, String tag, String assetUrl){
 		String prefix = repo.rawUrl() + "/" + tag + "/";
 		String yaml = Web.makeGitHubQuery(prefix + "quintessential.yaml");
 		QuintessentialYaml parsed = QuintessentialYaml.fromYaml(yaml);
@@ -39,7 +44,8 @@ public final class Versions{
 				Optional.ofNullable(parsed.Title),
 				Optional.ofNullable(parsed.Desc),
 				// in theory, someone could use a PSD here, but that's unlikely and probably not worth supporting here
-				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + ".png")
+				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + ".png"),
+				Optional.ofNullable(assetUrl)
 		);
 	}
 }

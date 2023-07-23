@@ -21,6 +21,8 @@ public final class UI{
 	private static JFrame frame;
 	private static JButton installedModsPage, getModsPage, quintessentialPage, settingsPage;
 	
+	private static final Icon installIcon = IconSet.iconLoader().getIcon("navigation/arrow/thick/arrowDown.svg");
+	
 	public static void createWindow(){
 		LafManager.install(new OneDarkTheme());
 		
@@ -82,7 +84,7 @@ public final class UI{
 			repoPanel.add(infoPanel);
 			
 			repoPanel.add(Box.createRigidArea(new Dimension(8, 8)));
-			repoPanel.add(new JButton("Install"));
+			repoPanel.add(new JButton(new InstallModAction(latest)));
 		}
 		
 		return repoPanel;
@@ -119,7 +121,7 @@ public final class UI{
 		if(install.hasMods())
 			details.add(new JButton(new RunOmAction(false, install)));
 		else
-			details.add(new JButton("Install Quintessential", IconSet.iconLoader().getIcon("navigation/arrow/thick/arrowDown.svg")));
+			details.add(new JButton("Install Quintessential", installIcon));
 		details.add(new JButton(new RunOmAction(true, install)));
 		details.add(new JButton(new OpenFolderAction(install.path())));
 		installPanel.add(details);
@@ -176,6 +178,24 @@ public final class UI{
 			}catch(IOException ex){
 				throw new UncheckedIOException(ex);
 			}
+		}
+	}
+	
+	private static class InstallModAction extends AbstractAction{
+		
+		private final ModVersion version;
+		
+		public InstallModAction(ModVersion version){
+			super("Install", installIcon);
+			this.version = version;
+			if(Main.installs.size() == 0 || version.assetUrl().isEmpty())
+				setEnabled(false);
+		}
+		
+		public void actionPerformed(ActionEvent e){
+			if(Main.installs.size() > 0)
+				version.assetUrl().ifPresent(url ->
+						Web.download(url, Main.installs.get(0).path().resolve("Mods").resolve(version.name() + ".zip")));
 		}
 	}
 }

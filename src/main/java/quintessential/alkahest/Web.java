@@ -1,13 +1,13 @@
 package quintessential.alkahest;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 public final class Web{
@@ -31,6 +31,18 @@ public final class Web{
 			hCon.disconnect();
 			
 			return output;
+		}catch(MalformedURLException e){
+			throw new IllegalStateException(e);
+		}catch(IOException e){
+			throw new UncheckedIOException(e);
+		}
+	}
+	
+	public static void download(String url, Path to){
+		try(ReadableByteChannel channel = Channels.newChannel(new URL(url).openStream());
+		    FileOutputStream output = new FileOutputStream(to.toFile())){
+			
+			output.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
 		}catch(MalformedURLException e){
 			throw new IllegalStateException(e);
 		}catch(IOException e){
