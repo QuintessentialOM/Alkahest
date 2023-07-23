@@ -21,7 +21,6 @@ import java.util.Optional;
 public final class UI{
 
 	private static JFrame frame;
-	private static JButton installedModsPage, getModsPage, quintessentialPage, settingsPage;
 	
 	private static final Icon installIcon = IconSet.iconLoader().getIcon("navigation/arrow/thick/arrowDown.svg");
 	
