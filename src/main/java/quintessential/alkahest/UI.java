@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -33,6 +35,10 @@ public final class UI{
 			public void setEnabled(boolean b){}
 		};
 		runButton.setBackground(Color.GREEN.darker().darker().darker());
+		runButton.addActionListener(e -> {
+			if(Main.installs.size() > 0)
+				Installs.startModded(Main.installs.get(0));
+		});
 		pane.setTabComponentAt(0, runButton);
 		pane.setEnabledAt(0, false);
 		pane.setSelectedIndex(1);

@@ -1,5 +1,7 @@
 package quintessential.alkahest;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,10 +23,32 @@ public final class Installs{
 		for(String hint : pathHints){
 			Path path = Path.of(hint);
 			if(Files.isDirectory(path) && Files.isRegularFile(path.resolve(vanillaName)))
-				ret.add(new OmInstall(hint, Files.isRegularFile(path.resolve(moddedName))));
+				ret.add(new OmInstall(path, Files.isRegularFile(path.resolve(moddedName))));
 		}
 		// TODO: more hint paths for other locations (e.g. on linux)
 		
 		return ret;
+	}
+	
+	public static void startVanilla(OmInstall install){
+		startAt(install, vanillaName);
+	}
+	
+	public static void startModded(OmInstall install){
+		startAt(install, moddedName);
+	}
+	
+	private static void startAt(OmInstall install, String filename){
+		Path exePath = install.path().resolve(filename);
+		if(Files.isRegularFile(exePath)){
+			var builder = new ProcessBuilder(exePath.toAbsolutePath().toString())
+					.directory(install.path().toFile())
+					.inheritIO();
+			try{
+				builder.start();
+			}catch(IOException e){
+				throw new UncheckedIOException(e);
+			}
+		}
 	}
 }
