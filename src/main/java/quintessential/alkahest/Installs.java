@@ -13,7 +13,8 @@ public final class Installs{
 	public static final String moddedName = "ModdedLightning.exe";
 	
 	public static final List<String> pathHints = List.of(
-			"C:/Program Files (x86)/Steam/steamapps/common/Opus Magnum"
+			"C:/Program Files (x86)/Steam/steamapps/common/Opus Magnum",
+			System.getProperty("user.home") + "/.local/share/Steam/steamapps/common/Opus Magnum"
 	);
 	
 	public static List<OmInstall> findInstalls(){
