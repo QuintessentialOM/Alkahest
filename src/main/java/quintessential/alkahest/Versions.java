@@ -31,7 +31,7 @@ public final class Versions{
 	private static ModVersion fetchVersionInfo(ModRepo repo, String tag){
 		String prefix = repo.rawUrl() + "/" + tag + "/";
 		String yaml = Web.makeGitHubQuery(prefix + "quintessential.yaml");
-		QuintessentialYaml parsed = new Yaml().loadAs(yaml, QuintessentialYaml.class);
+		QuintessentialYaml parsed = QuintessentialYaml.fromYaml(yaml);
 		return new ModVersion(repo,
 				tag,
 				parsed.Name,
@@ -41,14 +41,5 @@ public final class Versions{
 				// in theory, someone could use a PSD here, but that's unlikely and probably not worth supporting here
 				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + ".png")
 		);
-	}
-	
-	private static class QuintessentialYaml{
-		public String Name, Title, Desc, Version, Icon, DLL;
-		public List<QuintessentialDep> Dependencies, OptionalDependencies;
-	}
-	
-	private static class QuintessentialDep{
-		public String Name, Version;
 	}
 }
