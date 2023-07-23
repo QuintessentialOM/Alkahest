@@ -98,7 +98,7 @@ public final class UI{
 			Image image = ImageIO.read(u).getScaledInstance(64, 64, Image.SCALE_SMOOTH);
 			var icon = new ImageIcon(image);
 			icon.setDescription("Mod icon");
-			return Optional.of(new JLabel(icon));
+			return Optional.of(pad(new JLabel(icon), 6));
 		}catch(IOException e){
 			System.out.println("Invalid icon " + url);
 			return Optional.empty();
@@ -131,20 +131,33 @@ public final class UI{
 		return installPanel;
 	}
 	
-	private static JPanel createHPanel(int border){
+	private static JPanel createHPanel(int padding){
 		JPanel hPanel = new JPanel();
-		hPanel.setBorder(new EmptyBorder(border, border, border, border));
+		if(padding != 0)
+			hPanel.setBorder(new EmptyBorder(padding, padding, padding, padding));
 		hPanel.setLayout(new BoxLayout(hPanel, BoxLayout.X_AXIS));
 		hPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return hPanel;
 	}
 	
-	private static JPanel createVPanel(int border){
+	private static JPanel createVPanel(int padding){
 		JPanel vPanel = new JPanel();
-		vPanel.setBorder(new EmptyBorder(border, border, border, border));
+		if(padding != 0)
+			vPanel.setBorder(new EmptyBorder(padding, padding, padding, padding));
 		vPanel.setLayout(new BoxLayout(vPanel, BoxLayout.Y_AXIS));
 		vPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return vPanel;
+	}
+	
+	private static JComponent pad(JComponent component, int padding){
+		return pad(component, padding, padding, padding, padding);
+	}
+	
+	private static JComponent pad(JComponent component, int paddingTop, int paddingLeft, int paddingBottom, int paddingRight){
+		JPanel container = createHPanel(0);
+		container.add(component);
+		container.setBorder(new EmptyBorder(paddingTop, paddingLeft, paddingBottom, paddingRight));
+		return container;
 	}
 	
 	private static class RunOmAction extends AbstractAction{
