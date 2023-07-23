@@ -13,16 +13,15 @@ public final class Installs{
 	public static final String moddedName;
 
 	static {
-		if(System.getProperty("os.name").contains("Windows")) {
-			vanillaName = "Lightning.exe";
-			moddedName = "ModdedLightning.exe";
-		} else if(System.getProperty("os.arch").contains("64")) {
-			vanillaName = "Lightning.bin.x86_64";
-			moddedName = "ModdedLightning.bin.x86_64";
-		} else {
-			vanillaName = "Lightning.bin.x86";
-			moddedName = "ModdedLightning.bin.x86";
-		}
+		String suffix;
+		if(System.getProperty("os.name").contains("Windows"))
+			suffix = ".exe";
+		else if(System.getProperty("os.arch").contains("64"))
+			suffix = ".bin.x86_64";
+		else
+			suffix = ".bin.x86";
+		vanillaName = "Lightning" + suffix;
+		moddedName = "ModdedLightning" + suffix;
 	}
 
 	public static final List<String> pathHints = List.of(
