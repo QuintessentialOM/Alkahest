@@ -85,6 +85,7 @@ public final class UI{
 			repoPanel.add(infoPanel);
 			
 			repoPanel.add(Box.createRigidArea(new Dimension(8, 8)));
+			repoPanel.add(Box.createHorizontalGlue());
 			repoPanel.add(new JButton(new InstallModAction(latest)));
 		}
 		
