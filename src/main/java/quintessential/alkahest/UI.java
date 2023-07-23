@@ -2,6 +2,7 @@ package quintessential.alkahest;
 
 import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.components.OverlayScrollPane;
+import com.github.weisj.darklaf.components.loading.LoadingIndicator;
 import com.github.weisj.darklaf.iconset.IconSet;
 import com.github.weisj.darklaf.theme.OneDarkTheme;
 
@@ -86,7 +87,11 @@ public final class UI{
 			
 			repoPanel.add(Box.createRigidArea(new Dimension(8, 8)));
 			repoPanel.add(Box.createHorizontalGlue());
-			repoPanel.add(new JButton(new InstallModAction(latest)));
+			LoadingIndicator i = new LoadingIndicator();
+			i.setEnabled(false);
+			repoPanel.add(i);
+			repoPanel.add(Box.createRigidArea(new Dimension(6, 6)));
+			repoPanel.add(new JButton(new InstallModAction(latest, i)));
 		}
 		
 		return repoPanel;
@@ -160,6 +165,24 @@ public final class UI{
 		return container;
 	}
 	
+	// to be called from EDT
+	private static void runAsyncWithIndicator(Runnable r, LoadingIndicator indicator){
+		indicator.setEnabled(true);
+		indicator.setRunning(true);
+		
+		new SwingWorker<Void, Void>(){
+			protected Void doInBackground(){
+				r.run();
+				return null;
+			}
+			
+			protected void done(){
+				indicator.setRunning(false);
+				indicator.setEnabled(false);
+			}
+		}.execute();
+	}
+	
 	private static class RunOmAction extends AbstractAction{
 		
 		private final boolean vanilla;
@@ -200,10 +223,12 @@ public final class UI{
 	private static class InstallModAction extends AbstractAction{
 		
 		private final ModVersion version;
+		private final LoadingIndicator indicator;
 		
-		public InstallModAction(ModVersion version){
+		public InstallModAction(ModVersion version, LoadingIndicator indicator){
 			super("Install", installIcon);
 			this.version = version;
+			this.indicator = indicator;
 			if(Main.installs.size() == 0 || version.assetUrl().isEmpty())
 				setEnabled(false);
 		}
@@ -211,7 +236,8 @@ public final class UI{
 		public void actionPerformed(ActionEvent e){
 			if(Main.installs.size() > 0)
 				version.assetUrl().ifPresent(url ->
-						Web.download(url, Main.installs.get(0).path().resolve("Mods").resolve(version.name() + ".zip")));
+					runAsyncWithIndicator(() ->
+						Web.download(url, Main.installs.get(0).path().resolve("Mods").resolve(version.name() + ".zip")), indicator));
 		}
 	}
 }
