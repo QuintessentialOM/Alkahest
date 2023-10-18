@@ -14,23 +14,28 @@ public final class Versions{
 	private static final String query = "https://api.github.com/repos/%s/%s/releases?page=%s";
 	
 	public static List<ModVersion> fetchVersions(ModRepo repo, int page){
-		JsonArray response = JsonParser.parseString(Web.makeGitHubQuery(query.formatted(repo.owner(), repo.name(), page))).getAsJsonArray();
-		List<ModVersion> ret = new ArrayList<>(response.size());
-		for(JsonElement versionElem : response){
-			JsonObject versionObj = versionElem.getAsJsonObject();
-			String tagName = versionObj.get("tag_name").getAsString();
-			String assetUrl = null;
-			if(versionObj.has("assets")){
-				var assets = versionObj.getAsJsonArray("assets");
-				if(assets.size() == 1)
-					assetUrl = assets.get(0).getAsJsonObject().get("browser_download_url").getAsString();
+		try{
+			JsonArray response = JsonParser.parseString(Web.makeGitHubQuery(query.formatted(repo.owner(), repo.name(), page))).getAsJsonArray();
+			List<ModVersion> ret = new ArrayList<>(response.size());
+			for(JsonElement versionElem : response){
+				JsonObject versionObj = versionElem.getAsJsonObject();
+				String tagName = versionObj.get("tag_name").getAsString();
+				String assetUrl = null;
+				if(versionObj.has("assets")){
+					var assets = versionObj.getAsJsonArray("assets");
+					if(assets.size() == 1)
+						assetUrl = assets.get(0).getAsJsonObject().get("browser_download_url").getAsString();
+				}
+				
+				ModVersion version = fetchVersionInfo(repo, tagName, assetUrl);
+				ret.add(version);
 			}
 			
-			ModVersion version = fetchVersionInfo(repo, tagName, assetUrl);
-			ret.add(version);
+			return ret;
+		}catch(RuntimeException e){
+			System.err.println(e);
+			return List.of();
 		}
-		
-		return ret;
 	}
 	
 	private static ModVersion fetchVersionInfo(ModRepo repo, String tag, String assetUrl){
