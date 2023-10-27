@@ -33,7 +33,7 @@ public final class Versions{
 			
 			return ret;
 		}catch(RuntimeException e){
-			System.err.println(e);
+			e.printStackTrace();
 			return List.of();
 		}
 	}
