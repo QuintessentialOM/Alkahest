@@ -40,7 +40,7 @@ public final class UI{
 		};
 		runButton.setBackground(Color.GREEN.darker().darker().darker());
 		runButton.addActionListener(e -> {
-			if(Main.installs.size() > 0)
+			if(!Main.installs.isEmpty())
 				Installs.startModded(Main.installs.get(0));
 		});
 		pane.setTabComponentAt(0, runButton);
@@ -66,7 +66,7 @@ public final class UI{
 		JPanel repoPanel = createHPanel(8);
 		
 		List<ModVersion> versions = Versions.fetchVersions(repo, 1); // TODO: limit to latest release
-		if(versions.size() == 0){
+		if(versions.isEmpty()){
 			// if there's no releases, we can't do much
 			repoPanel.add(new JLabel(repo.name()));
 		}else{
