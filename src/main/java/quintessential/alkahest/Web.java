@@ -8,11 +8,12 @@ import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class Web{
 	
-	public static String makeGitHubQuery(String query){
+	public static Optional<String> makeGitHubQuery(String query){
 		try{
 			URL queryUrl = new URL(query);
 			URLConnection con = queryUrl.openConnection();
@@ -23,18 +24,19 @@ public final class Web{
 			hCon.setRequestProperty("X-GitHub-Api-Version", "2022-11-28");
 			
 			hCon.connect();
-			if(hCon.getResponseCode() != 200)
-				throw new RuntimeException("Could not connect to server (response code " + hCon.getResponseCode() + ")");
+			if(hCon.getResponseCode() != 200){
+				System.err.println("Could not connect to server for \"" + query + "\" (response code " + hCon.getResponseCode() + ")");
+				return Optional.empty();
+			}
 			
 			BufferedReader reader = new BufferedReader(new InputStreamReader(hCon.getInputStream()));
 			String output = reader.lines().collect(Collectors.joining("\n"));
 			hCon.disconnect();
 			
-			return output;
-		}catch(MalformedURLException e){
-			throw new IllegalStateException(e);
+			return Optional.of(output);
 		}catch(IOException e){
-			throw new UncheckedIOException(e);
+			e.printStackTrace();
+			return Optional.empty();
 		}
 	}
 	

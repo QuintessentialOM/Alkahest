@@ -1,9 +1,6 @@
 package quintessential.alkahest;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +12,10 @@ public final class Versions{
 	
 	public static List<ModVersion> fetchVersions(ModRepo repo, int page){
 		try{
-			JsonArray response = JsonParser.parseString(Web.makeGitHubQuery(query.formatted(repo.owner(), repo.name(), page))).getAsJsonArray();
+			Optional<String> resp = Web.makeGitHubQuery(query.formatted(repo.owner(), repo.name(), page));
+			if(resp.isEmpty())
+				return List.of();
+			JsonArray response = JsonParser.parseString(resp.get()).getAsJsonArray();
 			List<ModVersion> ret = new ArrayList<>(response.size());
 			for(JsonElement versionElem : response){
 				JsonObject versionObj = versionElem.getAsJsonObject();
@@ -27,30 +27,28 @@ public final class Versions{
 						assetUrl = assets.get(0).getAsJsonObject().get("browser_download_url").getAsString();
 				}
 				
-				ModVersion version = fetchVersionInfo(repo, tagName, assetUrl);
-				ret.add(version);
+				fetchVersionInfo(repo, tagName, assetUrl).ifPresent(ret::add);
 			}
 			
 			return ret;
-		}catch(RuntimeException e){
+		}catch(JsonSyntaxException e){
 			e.printStackTrace();
 			return List.of();
 		}
 	}
 	
-	private static ModVersion fetchVersionInfo(ModRepo repo, String tag, String assetUrl){
-		String prefix = repo.rawUrl() + "/" + tag + "/";
-		String yaml = Web.makeGitHubQuery(prefix + "quintessential.yaml");
-		QuintessentialYaml parsed = QuintessentialYaml.fromYaml(yaml);
-		return new ModVersion(repo,
-				tag,
-				parsed.Name,
-				parsed.Version,
-				Optional.ofNullable(parsed.Title),
-				Optional.ofNullable(parsed.Desc),
-				// in theory, someone could use a PSD here, but that's unlikely and probably not worth supporting here
-				Optional.ofNullable(parsed.Icon).map(path -> prefix + "Content/" + path + (path.endsWith(".png") ? "" : ".png")),
-				Optional.ofNullable(assetUrl)
-		);
+	private static Optional<ModVersion> fetchVersionInfo(ModRepo repo, String tag, String assetUrl){
+		return Web.makeGitHubQuery(repo.rawUrl() + "/" + tag + "/" + "quintessential.yaml")
+				.map(QuintessentialYaml::fromYaml)
+				.map(parsed -> new ModVersion(repo,
+						tag,
+						parsed.Name,
+						parsed.Version,
+						Optional.ofNullable(parsed.Title),
+						Optional.ofNullable(parsed.Desc),
+						// in theory, someone could use a PSD here, but that's unlikely and probably not worth supporting here
+						Optional.ofNullable(parsed.Icon).map(path -> repo.rawUrl() + "/" + tag + "/" + "Content/" + path + (path.endsWith(".png") ? "" : ".png")),
+						Optional.ofNullable(assetUrl)
+				));
 	}
 }
